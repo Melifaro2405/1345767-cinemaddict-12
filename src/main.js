@@ -14,7 +14,7 @@ const createSiteHeaderTemplate = () => {
 };
 
 const render = (container, template, place) => {
-  container.insertAdjacentHTML (place, template);
+  container.insertAdjacentHTML(place, template);
 };
 
 const body = document.body;
@@ -42,7 +42,7 @@ const createFilmsSortTemplate = () => {
       <li><a href="#" class="sort__button">Sort by date</a></li>
       <li><a href="#" class="sort__button">Sort by rating</a></li>
     </ul>`
-  )
+  );
 };
 
 const siteMainElement = body.querySelector(`.main`);
