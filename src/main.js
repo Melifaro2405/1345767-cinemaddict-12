@@ -1,4 +1,3 @@
-import {shuffle} from "lodash";
 import {render} from "./util.js";
 
 import {createSiteHeaderTemplate} from "./view/site-header.js";
@@ -12,8 +11,7 @@ import {createFilmCardTemplate} from "./view/film-card.js";
 import {createFooterStatTemplate} from "./view/footer-stat.js";
 import {createFilmDetailsTemplate} from "./view/film-details.js";
 
-import {generateFilms} from "./mock/film.js";
-
+import {generateFilms, statsCount} from "./mock/film.js";
 
 const FILMS_COUNT_PER_STEP = 5;
 const FILMS_RATED_COUNT = 2;
@@ -27,7 +25,7 @@ render(siteHeaderElement, createSiteHeaderTemplate(), `beforeend`);
 
 const siteMainElement = body.querySelector(`.main`);
 
-render(siteMainElement, createMainNavigationTemplate(), `beforeend`);
+render(siteMainElement, createMainNavigationTemplate(statsCount), `beforeend`);
 render(siteMainElement, createFilmsSortTemplate(), `beforeend`);
 render(siteMainElement, createFilmsBoardTemplate(), `beforeend`);
 
@@ -43,8 +41,8 @@ const filmsCommentedElement = boardElement.querySelector(`.films-list--most-comm
 
 const films = generateFilms();
 
-films.slice(0, Math.min(films.length, FILMS_COUNT_PER_STEP)).forEach((item) => {
-  render(filmsListElement, createFilmCardTemplate(item), `beforeend`);
+films.slice(0, Math.min(films.length, FILMS_COUNT_PER_STEP)).forEach((film) => {
+  render(filmsListElement, createFilmCardTemplate(film), `beforeend`);
 });
 
 if (films.length > FILMS_COUNT_PER_STEP) {
@@ -66,16 +64,22 @@ if (films.length > FILMS_COUNT_PER_STEP) {
   });
 }
 
-shuffle(films).slice(0, FILMS_RATED_COUNT).forEach((item) => {
-  render(filmsRatedElement, createFilmCardTemplate(item), `beforeend`);
-});
+films
+  .sort((a, b) => b.raiting - a.raiting)
+  .slice(0, FILMS_RATED_COUNT)
+  .forEach((item) => {
+    render(filmsRatedElement, createFilmCardTemplate(item), `beforeend`);
+  });
 
-shuffle(films).slice(0, FILMS_COMMENTED_COUNT).forEach((item) => {
-  render(filmsCommentedElement, createFilmCardTemplate(item), `beforeend`);
-});
+films
+  .sort((a, b) => b.comments.length - a.comments.length)
+  .slice(0, FILMS_COMMENTED_COUNT)
+  .forEach((item) => {
+    render(filmsCommentedElement, createFilmCardTemplate(item), `beforeend`);
+  });
 
 const siteFooterElement = body.querySelector(`.footer`);
 const footerStatElement = siteFooterElement.querySelector(`.footer__statistics`);
 
 render(footerStatElement, createFooterStatTemplate(), `beforeend`);
-render(body, createFilmDetailsTemplate(), `beforeend`);
+render(body, createFilmDetailsTemplate(films[0]), `beforeend`);
