@@ -1,11 +1,11 @@
 import {createElement} from "../util.js";
 
 export default class FilmCard {
-  constructor({isAddToWatchList, isAlreadyWatched, isAddToFavorites, film}) {
+  constructor(film) {
     this._element = null;
-    this._isAddToWatchListt = isAddToWatchList;
-    this._isAlreadyWatched = isAlreadyWatched;
-    this._isAddToFavorites = isAddToFavorites;
+    this._isAddToWatchListt = film.isAddToWatchList;
+    this._isAlreadyWatched = film.isAlreadyWatched;
+    this._isAddToFavorites = film.isAddToFavorites;
     this._film = film;
   }
 

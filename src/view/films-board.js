@@ -6,7 +6,7 @@ export default class FilmsBoard {
   }
 
   getTemplate() {
-    return `<section class="films"><section>`;
+    return `<section class="films"></section>`;
   }
 
   getElement() {

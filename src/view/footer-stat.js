@@ -1,13 +1,14 @@
 import {createElement} from "../util.js";
 
 export default class FooterStat {
-  constructor() {
+  constructor(films) {
     this._element = null;
+    this._films = films;
   }
 
   getTemplate() {
     return (
-      `<p>130 291 movies inside</p>`
+      `<p>${ this._films.length} movies inside</p>`
     );
   }
 
