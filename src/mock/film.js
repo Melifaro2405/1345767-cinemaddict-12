@@ -51,9 +51,9 @@ const generateTitle = () => {
 };
 
 export const statsCount = {
-  WatchListCount: random(0, 50),
-  HistoryCount: random(0, 50),
-  FavoritesCount: random(0, 50)
+  watchListCount: random(0, 50),
+  historyCount: random(0, 50),
+  favoritesCount: random(0, 50)
 };
 
 const generateDescription = () => {

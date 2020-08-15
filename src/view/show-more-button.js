@@ -1,18 +1,12 @@
 import {createElement} from "../util.js";
 
-export default class FilmsTopRated {
+export default class ShowMoreButton {
   constructor() {
     this._element = null;
   }
 
   getTemplate() {
-    return (
-      `<section class="films-list--extra">
-        <h2 class="films-list__title">Top rated</h2>
-
-        <div class="films-list__container films-list--top-rated""></div>
-      </section>`
-    );
+    return `<button class="films-list__show-more">Show more</button>`;
   }
 
   getElement() {
