@@ -1,12 +1,13 @@
-import {createElement} from "../util.js";
+import AbstractView from "./abstract.js";
 
-export default class FilmCard {
+export default class FilmCard extends AbstractView {
   constructor(film) {
-    this._element = null;
+    super();
     this._isAddToWatchListt = film.isAddToWatchList;
     this._isAlreadyWatched = film.isAlreadyWatched;
     this._isAddToFavorites = film.isAddToFavorites;
     this._film = film;
+    this._openClickHandler = this._openClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -31,15 +32,13 @@ export default class FilmCard {
     );
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate().trim());
-    }
-
-    return this._element;
+  _openClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.openClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setOpenClickHandler(callback) {
+    this._callback.openClick = callback;
+    this.getElement().addEventListener(`click`, this._openClickHandler);
   }
 }
