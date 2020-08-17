@@ -1,8 +1,8 @@
-import {createElement} from "../util.js";
+import AbstractView from "./abstract.js";
 
-export default class MainNavigation {
+export default class MainNavigation extends AbstractView {
   constructor({watchListCount, historyCount, favoritesCount}) {
-    this._element = null;
+    super();
     this._watchListCount = watchListCount;
     this._historyCount = historyCount;
     this._favoritesCount = favoritesCount;
@@ -20,17 +20,5 @@ export default class MainNavigation {
         <a href="#stats" class="main-navigation__additional">Stats</a>
       </nav>`
     );
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate().trim());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

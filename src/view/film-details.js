@@ -1,13 +1,14 @@
-import {createElement} from "../util.js";
+import AbstractView from "./abstract.js";
 
-export default class FilmDetails {
+export default class FilmDetails extends AbstractView {
   constructor(film) {
-    this._element = null;
+    super();
     this._isAddToWatchListt = film.isAddToWatchList;
     this._isAlreadyWatched = film.isAlreadyWatched;
     this._isAddToFavorites = film.isAddToFavorites;
     this._isAdult = film.isAdult;
     this._film = film;
+    this._closeClickHandler = this._closeClickHandler.bind(this);
   }
 
   _createComment(comment) {
@@ -149,15 +150,13 @@ export default class FilmDetails {
     );
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate().trim());
-    }
-
-    return this._element;
+  _closeClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeClick();
   }
 
-  removeElement() {
-    this._element = null;
+  setCloseClickHandler(callback) {
+    this._callback.closeClick = callback;
+    this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeClickHandler);
   }
 }
