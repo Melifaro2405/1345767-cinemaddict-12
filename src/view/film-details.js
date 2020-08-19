@@ -159,4 +159,28 @@ export default class FilmDetails extends AbstractView {
     this._callback.closeClick = callback;
     this.getElement().querySelector(`.film-details__close-btn`).addEventListener(`click`, this._closeClickHandler);
   }
+
+  _showPopup(child) {
+    if (child instanceof AbstractView) {
+      child = child.getElement();
+    }
+    document.body.appendChild(child);
+    document.body.classList.add(`hide-overflow`);
+  }
+
+  _closePopup(child) {
+    if (child instanceof AbstractView) {
+      child = child.getElement();
+    }
+    document.body.removeChild(child);
+    document.body.classList.remove(`hide-overflow`);
+  }
+
+  showFilmDetails() {
+    this._showPopup(this);
+  }
+
+  hideFilmDetails() {
+    this._closePopup(this);
+  }
 }
