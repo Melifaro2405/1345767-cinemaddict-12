@@ -39,22 +39,6 @@ export const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export const showPopup = (child) => {
-  if (child instanceof Abstract) {
-    child = child.getElement();
-  }
-  document.body.appendChild(child);
-  document.body.classList.add(`hide-overflow`);
-};
-
-export const closePopup = (child) => {
-  if (child instanceof Abstract) {
-    child = child.getElement();
-  }
-  document.body.removeChild(child);
-  document.body.classList.remove(`hide-overflow`);
-};
-
 export const remove = (component) => {
   if (!(component instanceof Abstract)) {
     throw new Error(`Can remove only components`);

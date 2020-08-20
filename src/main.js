@@ -1,6 +1,6 @@
 import SiteHeaderView from "./view/site-header.js";
 import MainNavigationView from "./view/main-navigation.js";
-import FilmsSortView from "./view/films-sort.js";
+// import FilmsSortView from "./view/films-sort.js";
 import {render, RenderPosition} from "./utils/render.js";
 import BoardPresenter from "./presenter/board.js";
 import FooterStatView from "./view/footer-stat.js";
@@ -11,17 +11,18 @@ const siteHeader = body.querySelector(`.header`);
 const siteMain = body.querySelector(`.main`);
 const siteFooter = body.querySelector(`.footer`);
 
+const boardPresenter = new BoardPresenter(siteMain);
+
+const films = generateFilms();
+
 const siteHeaderComponent = new SiteHeaderView();
 render(siteHeader, siteHeaderComponent, RenderPosition.BEFOREEND);
 
 const MainNavigationComponent = new MainNavigationView(statsCount);
 render(siteMain, MainNavigationComponent, RenderPosition.BEFOREEND);
 
-const FilmsSortComponent = new FilmsSortView();
-render(siteMain, FilmsSortComponent, RenderPosition.BEFOREEND);
-
-const boardPresenter = new BoardPresenter(siteMain);
-const films = generateFilms();
+// const FilmsSortComponent = new FilmsSortView();
+// render(siteMain, FilmsSortComponent, RenderPosition.BEFOREEND);
 
 boardPresenter.init(films);
 
