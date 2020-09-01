@@ -163,7 +163,8 @@ const generateComment = () => {
     autor: generateCommentAutor(),
     time: generateCommentTime(),
     text: generateCommentText(),
-    emoji: emojies[random(0, emojies.length - 1)]
+    emoji: emojies[random(0, emojies.length - 1)],
+    emojiesList: emojies
   };
 };
 

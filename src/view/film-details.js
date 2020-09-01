@@ -9,9 +9,11 @@ export default class FilmDetails extends SmartView {
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
     this._openClickHandler = this._openClickHandler.bind(this);
+    this._commentInputHandler = this._commentInputHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+    this._emojiClickHandler = this._emojiClickHandler.bind(this);
 
     this.setHandlers();
   }
@@ -177,7 +179,6 @@ export default class FilmDetails extends SmartView {
     if (child instanceof SmartView) {
       child = child.getElement();
     }
-    // document.body.(child);
     child.remove();
     document.body.classList.remove(`hide-overflow`);
   }
@@ -213,10 +214,50 @@ export default class FilmDetails extends SmartView {
     });
   }
 
+  _emojiClickHandler(evt) {
+    const emojiContainer = document.body.querySelector(`.film-details__add-emoji-label`);
+    const emoji = `<img src="${evt.target.src}" width="55" height="55" alt="emoji">`;
+    emojiContainer.innerHTML = emoji;
+  }
+
+  _commentInputHandler(evt) {
+    if (evt.keyCode === 13 && evt.ctrlKey) {
+      evt.preventDefault();
+
+      const inputComment = evt.target.value;
+      const emojiImg = this.getElement().querySelector(`.film-details__emoji-list input:checked`).value;
+
+      const newComment = {
+        autor: `Вася Пупкин`,
+        time: parseInt(new Date().getTime() / 1000, 10),
+        text: inputComment,
+        emoji: `images/emoji/${emojiImg}.png`
+      };
+
+      this.updateData({
+        comments: [...this._film.comments, newComment]
+      });
+    }
+  }
+
   setHandlers() {
-    this.getElement().querySelector(`#watchlist`).addEventListener(`change`, this._watchlistClickHandler);
-    this.getElement().querySelector(`#watched`).addEventListener(`change`, this._watchedClickHandler);
-    this.getElement().querySelector(`#favorite`).addEventListener(`change`, this._favoriteClickHandler);
+    this.getElement().querySelector(`#watchlist`)
+    .addEventListener(`change`, this._watchlistClickHandler);
+
+    this.getElement().querySelector(`#watched`)
+    .addEventListener(`change`, this._watchedClickHandler);
+
+    this.getElement().querySelector(`#favorite`)
+    .addEventListener(`change`, this._favoriteClickHandler);
+
+    this.getElement().querySelector(`.film-details__comment-input`)
+    .addEventListener(`keydown`, this._commentInputHandler);
+
+    this.getElement().querySelectorAll(`.film-details__emoji-label img`)
+    .forEach((img) => {
+      img.addEventListener(`click`, this._emojiClickHandler);
+    });
+
     this.setCloseClickHandler(this._callback.closeClick);
   }
 }
