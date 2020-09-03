@@ -3,3 +3,7 @@ export const SortType = {
   DATE: `date`,
   RATING: `rating`
 };
+
+export const KEYCODE = {
+  ENTER: 13
+};

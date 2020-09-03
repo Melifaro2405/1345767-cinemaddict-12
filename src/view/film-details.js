@@ -1,4 +1,5 @@
 import SmartView from "./abstract-smart.js";
+import {KEYCODE} from "../const.js";
 
 export default class FilmDetails extends SmartView {
   constructor(film) {
@@ -6,6 +7,9 @@ export default class FilmDetails extends SmartView {
 
     this._isAdult = film.isAdult;
     this._film = film;
+
+    const emojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    this._emojiContainer = emojiContainer;
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
     this._openClickHandler = this._openClickHandler.bind(this);
@@ -214,21 +218,20 @@ export default class FilmDetails extends SmartView {
     });
   }
 
-  _emojiClickHandler(evt) {
-    const emojiContainer = document.body.querySelector(`.film-details__add-emoji-label`);
-    const emoji = `<img src="${evt.target.src}" width="55" height="55" alt="emoji">`;
-    emojiContainer.innerHTML = emoji;
+  _emojiClickHandler(src) {
+    const emoji = `<img src="images/emoji/${src}.png" width="55" height="55" alt="emoji">`;
+    this._emojiContainer.innerHTML = emoji;
   }
 
   _commentInputHandler(evt) {
-    if (evt.keyCode === 13 && evt.ctrlKey) {
+    if (evt.keyCode === KEYCODE.ENTER && evt.ctrlKey) {
       evt.preventDefault();
 
       const inputComment = evt.target.value;
       const emojiImg = this.getElement().querySelector(`.film-details__emoji-list input:checked`).value;
 
       const newComment = {
-        autor: `Вася Пупкин`,
+        autor: `here will be the name`,
         time: parseInt(new Date().getTime() / 1000, 10),
         text: inputComment,
         emoji: `images/emoji/${emojiImg}.png`
@@ -242,21 +245,23 @@ export default class FilmDetails extends SmartView {
 
   setHandlers() {
     this.getElement().querySelector(`#watchlist`)
-    .addEventListener(`change`, this._watchlistClickHandler);
+      .addEventListener(`change`, this._watchlistClickHandler);
 
     this.getElement().querySelector(`#watched`)
-    .addEventListener(`change`, this._watchedClickHandler);
+      .addEventListener(`change`, this._watchedClickHandler);
 
     this.getElement().querySelector(`#favorite`)
-    .addEventListener(`change`, this._favoriteClickHandler);
+      .addEventListener(`change`, this._favoriteClickHandler);
 
     this.getElement().querySelector(`.film-details__comment-input`)
-    .addEventListener(`keydown`, this._commentInputHandler);
+      .addEventListener(`keydown`, this._commentInputHandler);
 
-    this.getElement().querySelectorAll(`.film-details__emoji-label img`)
-    .forEach((img) => {
-      img.addEventListener(`click`, this._emojiClickHandler);
-    });
+    this.getElement().querySelector(`.film-details__emoji-list`)
+      .addEventListener(`click`, (evt) => {
+        if (evt.target.tagName === `INPUT`) {
+          this._emojiClickHandler(evt.target.value);
+        }
+      });
 
     this.setCloseClickHandler(this._callback.closeClick);
   }
