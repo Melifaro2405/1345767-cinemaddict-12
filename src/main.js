@@ -1,8 +1,7 @@
 import SiteHeaderView from "./view/site-header.js";
 import MainNavigationView from "./view/main-navigation.js";
-// import FilmsSortView from "./view/films-sort.js";
 import {render, RenderPosition} from "./utils/render.js";
-import BoardPresenter from "./presenter/board.js";
+import BoardPresenter from "./presenter/board-presenter.js";
 import FooterStatView from "./view/footer-stat.js";
 import {generateFilms, statsCount} from "./mock/film.js";
 
@@ -21,8 +20,6 @@ render(siteHeader, siteHeaderComponent, RenderPosition.BEFOREEND);
 const MainNavigationComponent = new MainNavigationView(statsCount);
 render(siteMain, MainNavigationComponent, RenderPosition.BEFOREEND);
 
-// const FilmsSortComponent = new FilmsSortView();
-// render(siteMain, FilmsSortComponent, RenderPosition.BEFOREEND);
 
 boardPresenter.init(films);
 

@@ -24,6 +24,13 @@ export default class FilmsSort extends AbstractView {
     }
 
     evt.preventDefault();
+
+    if (!evt.target.classList.contains(`sort__button--active`)) {
+      const activeButton = this.getElement().querySelector(`.sort__button--active`);
+      activeButton.classList.remove(`sort__button--active`);
+      evt.target.classList.add(`sort__button--active`);
+    }
+
     this._callback.sortTypeChange(evt.target.dataset.sortType);
   }
 

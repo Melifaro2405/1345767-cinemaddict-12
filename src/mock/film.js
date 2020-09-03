@@ -1,6 +1,8 @@
 import {random} from 'lodash';
 import {shuffle} from 'lodash';
 
+export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+
 const posters = [
   `images/posters/made-for-each-other.png`,
   `images/posters/popeye-meets-sinbad.png`,
@@ -161,7 +163,8 @@ const generateComment = () => {
     autor: generateCommentAutor(),
     time: generateCommentTime(),
     text: generateCommentText(),
-    emoji: emojies[random(0, emojies.length - 1)]
+    emoji: emojies[random(0, emojies.length - 1)],
+    emojiesList: emojies
   };
 };
 
@@ -176,6 +179,7 @@ export const generateComments = () => {
 
 export const generateFilm = () => {
   return {
+    id: generateId(),
     title: generateTitle(),
     poster: posters[random(0, posters.length - 1)],
     director: generateFilmDirector(),

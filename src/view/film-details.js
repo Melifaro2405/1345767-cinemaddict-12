@@ -1,14 +1,25 @@
-import AbstractView from "./abstract.js";
+import SmartView from "./abstract-smart.js";
+import {KEYCODE} from "../const.js";
 
-export default class FilmDetails extends AbstractView {
+export default class FilmDetails extends SmartView {
   constructor(film) {
     super();
-    this._isAddToWatchListt = film.isAddToWatchList;
-    this._isAlreadyWatched = film.isAlreadyWatched;
-    this._isAddToFavorites = film.isAddToFavorites;
+
     this._isAdult = film.isAdult;
     this._film = film;
+
+    const emojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
+    this._emojiContainer = emojiContainer;
+
     this._closeClickHandler = this._closeClickHandler.bind(this);
+    this._openClickHandler = this._openClickHandler.bind(this);
+    this._commentInputHandler = this._commentInputHandler.bind(this);
+    this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
+    this._watchedClickHandler = this._watchedClickHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
+    this._emojiClickHandler = this._emojiClickHandler.bind(this);
+
+    this.setHandlers();
   }
 
   _createComment(comment) {
@@ -95,13 +106,13 @@ export default class FilmDetails extends AbstractView {
             </div>
 
             <section class="film-details__controls">
-              <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${this._isAddToWatchList ? `checked` : ``}>
+              <input type="checkbox" class="film-details__control-input visually-hidden" id="watchlist" name="watchlist" ${this._film.isAddToWatchList ? `checked` : ``}>
               <label for="watchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
 
-              <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${this._isAlreadyWatched ? `checked` : ``}>
+              <input type="checkbox" class="film-details__control-input visually-hidden" id="watched" name="watched" ${this._film.isAlreadyWatched ? `checked` : ``}>
               <label for="watched" class="film-details__control-label film-details__control-label--watched">Already watched</label>
 
-              <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${this._isAddToFavorites ? `checked` : ``}>
+              <input type="checkbox" class="film-details__control-input visually-hidden" id="favorite" name="favorite" ${this._film.isAddToFavorites ? `checked` : ``}>
               <label for="favorite" class="film-details__control-label film-details__control-label--favorite">Add to favorites</label>
             </section>
           </div>
@@ -152,7 +163,7 @@ export default class FilmDetails extends AbstractView {
 
   _closeClickHandler(evt) {
     evt.preventDefault();
-    this._callback.closeClick();
+    this._callback.closeClick(this._film);
   }
 
   setCloseClickHandler(callback) {
@@ -161,7 +172,7 @@ export default class FilmDetails extends AbstractView {
   }
 
   _showPopup(child) {
-    if (child instanceof AbstractView) {
+    if (child instanceof SmartView) {
       child = child.getElement();
     }
     document.body.appendChild(child);
@@ -169,10 +180,10 @@ export default class FilmDetails extends AbstractView {
   }
 
   _closePopup(child) {
-    if (child instanceof AbstractView) {
+    if (child instanceof SmartView) {
       child = child.getElement();
     }
-    document.body.removeChild(child);
+    child.remove();
     document.body.classList.remove(`hide-overflow`);
   }
 
@@ -182,5 +193,76 @@ export default class FilmDetails extends AbstractView {
 
   hideFilmDetails() {
     this._closePopup(this);
+  }
+
+  _openClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.openClick();
+  }
+
+  _watchlistClickHandler() {
+    this.updateData({
+      isAddToWatchList: !this._film.isAddToWatchList
+    });
+  }
+
+  _watchedClickHandler() {
+    this.updateData({
+      isAlreadyWatched: !this._film.isAlreadyWatched
+    });
+  }
+
+  _favoriteClickHandler() {
+    this.updateData({
+      isAddToFavorites: !this._film.isAddToFavorites
+    });
+  }
+
+  _emojiClickHandler(src) {
+    const emoji = `<img src="images/emoji/${src}.png" width="55" height="55" alt="emoji">`;
+    this._emojiContainer.innerHTML = emoji;
+  }
+
+  _commentInputHandler(evt) {
+    if (evt.keyCode === KEYCODE.ENTER && evt.ctrlKey) {
+      evt.preventDefault();
+
+      const inputComment = evt.target.value;
+      const emojiImg = this.getElement().querySelector(`.film-details__emoji-list input:checked`).value;
+
+      const newComment = {
+        autor: `here will be the name`,
+        time: parseInt(new Date().getTime() / 1000, 10),
+        text: inputComment,
+        emoji: `images/emoji/${emojiImg}.png`
+      };
+
+      this.updateData({
+        comments: [...this._film.comments, newComment]
+      });
+    }
+  }
+
+  setHandlers() {
+    this.getElement().querySelector(`#watchlist`)
+      .addEventListener(`change`, this._watchlistClickHandler);
+
+    this.getElement().querySelector(`#watched`)
+      .addEventListener(`change`, this._watchedClickHandler);
+
+    this.getElement().querySelector(`#favorite`)
+      .addEventListener(`change`, this._favoriteClickHandler);
+
+    this.getElement().querySelector(`.film-details__comment-input`)
+      .addEventListener(`keydown`, this._commentInputHandler);
+
+    this.getElement().querySelector(`.film-details__emoji-list`)
+      .addEventListener(`click`, (evt) => {
+        if (evt.target.tagName === `INPUT`) {
+          this._emojiClickHandler(evt.target.value);
+        }
+      });
+
+    this.setCloseClickHandler(this._callback.closeClick);
   }
 }
