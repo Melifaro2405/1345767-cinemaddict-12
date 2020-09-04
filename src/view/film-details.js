@@ -1,5 +1,6 @@
 import SmartView from "./abstract-smart.js";
-import {KEYCODE} from "../const.js";
+import {KeyCode} from "../const.js";
+import {formatFilmFullDate, formatFilmRunTime, formatCommentTime} from "../utils/format-date.js";
 
 export default class FilmDetails extends SmartView {
   constructor(film) {
@@ -8,8 +9,11 @@ export default class FilmDetails extends SmartView {
     this._isAdult = film.isAdult;
     this._film = film;
 
-    const emojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
-    this._emojiContainer = emojiContainer;
+    const filmReleaseFullDate = formatFilmFullDate(this._film.releaseDate);
+    this.filmReleaseFullDate = filmReleaseFullDate;
+
+    const filmRunTime = formatFilmRunTime(this._film.runtime);
+    this._filmRunTime = filmRunTime;
 
     this._closeClickHandler = this._closeClickHandler.bind(this);
     this._openClickHandler = this._openClickHandler.bind(this);
@@ -23,6 +27,9 @@ export default class FilmDetails extends SmartView {
   }
 
   _createComment(comment) {
+
+    const filmCommentDate = formatCommentTime(comment.time);
+
     return (
       `<li class="film-details__comment">
           <span class="film-details__comment-emoji">
@@ -32,7 +39,7 @@ export default class FilmDetails extends SmartView {
             <p class="film-details__comment-text">${comment.text}</p>
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comment.autor}</span>
-              <span class="film-details__comment-day">${comment.time}</span>
+              <span class="film-details__comment-day">${filmCommentDate}</span>
               <button class="film-details__comment-delete">Delete</button>
             </p>
           </div>
@@ -82,11 +89,11 @@ export default class FilmDetails extends SmartView {
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Release Date</td>
-                    <td class="film-details__cell">${this._film.releaseDate}</td>
+                    <td class="film-details__cell">${this.filmReleaseFullDate}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Runtime</td>
-                    <td class="film-details__cell">${this._film.runtime}m</td>
+                    <td class="film-details__cell">${this._filmRunTime}</td>
                   </tr>
                   <tr class="film-details__row">
                     <td class="film-details__term">Country</td>
@@ -219,20 +226,22 @@ export default class FilmDetails extends SmartView {
   }
 
   _emojiClickHandler(src) {
+    const emojiContainer = this.getElement().querySelector(`.film-details__add-emoji-label`);
     const emoji = `<img src="images/emoji/${src}.png" width="55" height="55" alt="emoji">`;
-    this._emojiContainer.innerHTML = emoji;
+    emojiContainer.innerHTML = emoji;
   }
 
   _commentInputHandler(evt) {
-    if (evt.keyCode === KEYCODE.ENTER && evt.ctrlKey) {
+    if (evt.keyCode === KeyCode.ENTER && evt.ctrlKey) {
       evt.preventDefault();
 
       const inputComment = evt.target.value;
+
       const emojiImg = this.getElement().querySelector(`.film-details__emoji-list input:checked`).value;
 
       const newComment = {
         autor: `here will be the name`,
-        time: parseInt(new Date().getTime() / 1000, 10),
+        time: parseInt(new Date().getTime(), 10),
         text: inputComment,
         emoji: `images/emoji/${emojiImg}.png`
       };

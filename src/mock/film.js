@@ -70,8 +70,8 @@ const generateRate = () => {
 };
 
 const generateDate = () => {
-  const time = parseInt(new Date().getTime() / 1000, 10);
-  const randomTime = random(time);
+  const date = parseInt(new Date().getTime(), 10);
+  const randomTime = random(date);
   return randomTime;
 };
 
@@ -153,9 +153,9 @@ const generateCommentAutor = () => {
 };
 
 const generateCommentTime = () => {
-  const time = parseInt(new Date().getTime() / 1000, 10);
-  const randomTime = random(time);
-  return randomTime;
+  const time = parseInt(new Date().getTime(), 10);
+  // const randomTime = random(time);
+  return time;
 };
 
 const generateComment = () => {
