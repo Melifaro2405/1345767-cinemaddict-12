@@ -4,6 +4,6 @@ export const SortType = {
   RATING: `rating`
 };
 
-export const KEYCODE = {
+export const KeyCode = {
   ENTER: 13
 };

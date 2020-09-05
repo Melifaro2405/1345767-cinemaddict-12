@@ -1,4 +1,5 @@
 import AbstractView from "./abstract.js";
+import {formatFilmYear, formatFilmRunTime} from "../utils/format-date.js";
 
 export default class FilmCard extends AbstractView {
   constructor(film) {
@@ -9,6 +10,12 @@ export default class FilmCard extends AbstractView {
     this._isAddToFavorites = film.isAddToFavorites;
 
     this._film = film;
+
+    const filmReleaseDate = formatFilmYear(this._film.releaseDate);
+    this._filmReleaseDate = filmReleaseDate;
+
+    const filmRunTime = formatFilmRunTime(this._film.runtime);
+    this._filmRunTime = filmRunTime;
 
     this._openClickHandler = this._openClickHandler.bind(this);
     this._watchlistClickHandler = this._watchlistClickHandler.bind(this);
@@ -22,8 +29,8 @@ export default class FilmCard extends AbstractView {
         <h3 class="film-card__title">${this._film.title}</h3>
         <p class="film-card__rating">${this._film.raiting}</p>
         <p class="film-card__info">
-          <span class="film-card__year">${this._film.releaseDate}</span>
-          <span class="film-card__duration">${this._film.runtime}m</span>
+          <span class="film-card__year">${this._filmReleaseDate}</span>
+          <span class="film-card__duration">${this._filmRunTime}</span>
           <span class="film-card__genre">${this._film.genres[0]}</span>
         </p>
         <img src="${this._film.poster}" alt="" class="film-card__poster">
