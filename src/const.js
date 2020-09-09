@@ -4,6 +4,23 @@ export const SortType = {
   RATING: `rating`
 };
 
+export const FilterType = {
+  ALL_MOVIES: `all movies`,
+  WATCHLIST: `watchlist`,
+  HISTORY: `history`,
+  FAVORITES: `favorites`
+};
+
 export const KeyCode = {
   ENTER: 13
+};
+
+export const UserAction = {
+  ADD_COMMENT: `ADD_COMMENT`,
+  DELETE_COMMENT: `DELETE_COMMENT`
+};
+
+export const UpdateType = {
+  MINOR: `MINOR`,
+  MAJOR: `MAJOR`
 };

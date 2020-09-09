@@ -9,20 +9,23 @@ import FilmCardView from "../view/film-card.js";
 import FilmsSortView from "../view/films-sort.js";
 import FilmPresenter from "./film-presenter.js";
 import {SortType} from "../const.js";
+import {filterUtils} from "../utils/filter-films.js";
 import {sortFilmDate, sortFilmRating} from "../utils/sort-films.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
-import {updateItem} from "../utils/common.js";
 
 const FILMS_COUNT_PER_STEP = 5;
 const FILMS_RATED_COUNT = 2;
 const FILMS_COMMENTED_COUNT = 2;
 
 export default class Board {
-  constructor(boardContainer) {
+  constructor(boardContainer, filmsModel, filterModel) {
+    this._filmsModel = filmsModel;
+    this._filterModel = filterModel;
     this._boardContainer = boardContainer;
-    this._renderedFilmsCount = FILMS_COUNT_PER_STEP;
+    this._renderedFilmCount = FILMS_COUNT_PER_STEP;
     this._filmPresenter = {};
 
+    this._sortComponent = new FilmsSortView();
     this._boardComponent = new FilmsBoardView();
     this._listComponent = new FilmsListView();
     this._listContainerComponent = new FilmsListContainerView();
@@ -34,12 +37,12 @@ export default class Board {
     this._handleFilmChange = this._handleFilmChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+
+    this._filmsModel.addObserver(this._handleFilmChange.bind(this));
+    this._filterModel.addObserver(this._onFilterTypeChange.bind(this));
   }
 
-  init(boardFilms) {
-    this._boardFilms = boardFilms.slice();
-    this._sourcedBoardFilms = boardFilms.slice();
-
+  init() {
     this._renderSort();
 
     render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
@@ -52,25 +55,26 @@ export default class Board {
     this._renderMostCommented();
   }
 
-  _handleFilmChange(updatedFilm) {
-    this._boardFilms = updateItem(this._boardFilms, updatedFilm);
-    this._sourcedBoardFilms = updateItem(this._sourcedBoardFilms, updatedFilm);
-    this._filmPresenter[updatedFilm.id].init(updatedFilm);
+  _getFilms() {
+    const films = this._filmsModel.getFilms();
+    const filterAddFilms = filterUtils[this._filterModel.getFilter()](films);
+
+    switch (this._currentSortType) {
+      case SortType.DATE:
+        return filterAddFilms.slice().sort(sortFilmDate);
+      case SortType.RATING:
+        return filterAddFilms.slice().sort(sortFilmRating);
+    }
+    return filterAddFilms;
   }
 
-  _sortFilms(sortType) {
-    switch (sortType) {
-      case SortType.DATE:
-        this._boardFilms.sort(sortFilmDate);
-        break;
-      case SortType.RATING:
-        this._boardFilms.sort(sortFilmRating);
-        break;
-      default:
-        this._boardFilms = this._sourcedBoardFilms.slice();
-    }
+  _onFilterTypeChange() {
+    this._clearFilmList();
+    this._renderFilmList();
+  }
 
-    this._currentSortType = sortType;
+  _handleFilmChange(filterType, updatedFilm) {
+    this._filmPresenter[updatedFilm.id].init(updatedFilm);
   }
 
   _handleSortTypeChange(sortType) {
@@ -78,13 +82,12 @@ export default class Board {
       return;
     }
 
-    this._sortFilms(sortType);
+    this._currentSortType = sortType;
     this._clearFilmList();
     this._renderFilmList();
   }
 
   _renderSort() {
-    this._sortComponent = new FilmsSortView(this._sortFilms);
     render(this._boardContainer, this._sortComponent, RenderPosition.BEFOREEND);
     this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
@@ -94,7 +97,7 @@ export default class Board {
       .values(this._filmPresenter)
       .forEach((presenter) => presenter.destroy());
     this._filmPresenter = {};
-    this._renderedFilmsCount = FILMS_COUNT_PER_STEP;
+    this._renderedFilmCount = FILMS_COUNT_PER_STEP;
   }
 
   _renderList() {
@@ -108,7 +111,7 @@ export default class Board {
   _renderTopRated() {
     render(this._boardComponent, this._topRatedComponent, RenderPosition.BEFOREEND);
 
-    this._boardFilms
+    this._getFilms()
       .sort((a, b) => b.raiting - a.raiting)
       .slice(0, FILMS_RATED_COUNT)
       .forEach((film) => {
@@ -121,7 +124,7 @@ export default class Board {
   _renderMostCommented() {
     render(this._boardComponent, this._mostCommentedComponent, RenderPosition.BEFOREEND);
 
-    this._boardFilms
+    this._getFilms()
       .sort((a, b) => b.comments.length - a.comments.length)
       .slice(0, FILMS_COMMENTED_COUNT)
       .forEach((film) => {
@@ -132,15 +135,13 @@ export default class Board {
   }
 
   _renderFilm(film) {
-    const filmPresenter = new FilmPresenter(this._listContainerComponent, this._handleFilmChange);
+    const filmPresenter = new FilmPresenter(this._listContainerComponent, this._filmsModel.updateFilm.bind(this._filmsModel));
     filmPresenter.init(film);
     this._filmPresenter[film.id] = filmPresenter;
   }
 
-  _renderFilms(from, to) {
-    this._boardFilms
-      .slice(from, to)
-      .forEach((boardFilm) => this._renderFilm(boardFilm));
+  _renderFilms(films) {
+    films.forEach((film) => this._renderFilm(film));
   }
 
   _renderNoFilms() {
@@ -148,10 +149,14 @@ export default class Board {
   }
 
   _handleShowMoreButtonClick() {
-    this._renderFilms(this._renderedFilmsCount, this._renderedFilmsCount + FILMS_COUNT_PER_STEP);
-    this._renderedFilmsCount += FILMS_COUNT_PER_STEP;
+    const filmCount = this._getFilms().length;
+    const newRenderedFilmCount = Math.min(filmCount, this._renderedFilmCount + FILMS_COUNT_PER_STEP);
+    const films = this._getFilms().slice(this._renderedFilmCount, newRenderedFilmCount);
 
-    if (this._renderedFilmsCount >= this._boardFilms.length) {
+    this._renderFilms(films);
+    this._renderedFilmCount = newRenderedFilmCount;
+
+    if (this._renderedFilmCount >= filmCount) {
       remove(this._showMoreButtonComponent);
     }
   }
@@ -162,15 +167,18 @@ export default class Board {
   }
 
   _renderFilmList() {
-    this._renderFilms(0, Math.min(this._boardFilms.length, FILMS_COUNT_PER_STEP));
+    const filmCount = this._getFilms().length;
+    const films = filterUtils[this._filterModel.getFilter()](this._getFilms()).slice(0, Math.min(filmCount, FILMS_COUNT_PER_STEP));
 
-    if (this._boardFilms.length > FILMS_COUNT_PER_STEP) {
+    this._renderFilms(films);
+
+    if (filmCount > FILMS_COUNT_PER_STEP) {
       this._renderShowMoreButton();
     }
   }
 
   _renderBoard() {
-    if (this._boardFilms.length === 0) {
+    if (this._getFilms().length === 0) {
       this._renderNoFilms();
       return;
     }
