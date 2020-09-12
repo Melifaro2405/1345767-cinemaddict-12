@@ -1,3 +1,4 @@
+import he from "he";
 import SmartView from "./abstract-smart.js";
 import {KeyCode} from "../const.js";
 import {formatFilmFullDate, formatFilmRunTime, formatCommentTime} from "../utils/format-date.js";
@@ -36,7 +37,7 @@ export default class FilmDetails extends SmartView {
             <img src="${comment.emoji}" width="55" height="55" alt="emoji-smile">
           </span>
           <div>
-            <p class="film-details__comment-text">${comment.text}</p>
+            <p class="film-details__comment-text">${he.encode(comment.text)}</p>
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comment.autor}</span>
               <span class="film-details__comment-day">${filmCommentDate}</span>

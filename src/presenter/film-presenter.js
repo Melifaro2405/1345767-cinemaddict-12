@@ -1,6 +1,7 @@
 import FilmCardView from "../view/film-card.js";
 import FilmDetailsView from "../view/film-details.js";
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
+import {UpdateType} from "../const.js";
 
 export default class Film {
   constructor(filmListContainer, changeData) {
@@ -40,7 +41,6 @@ export default class Film {
 
     replace(this._filmCardComponent, prevfilmCardComponent);
 
-
     if (this._filmListContainer.getElement().contains(prevfilmDetailsComponent.getElement())) {
       replace(this._filmDetailsComponent, prevfilmDetailsComponent);
     }
@@ -77,6 +77,7 @@ export default class Film {
 
   _handleWatchlistClick() {
     this._changeData(
+        UpdateType.MINOR,
         Object.assign(
             {},
             this._film,
@@ -89,6 +90,7 @@ export default class Film {
 
   _handleWatchedClick() {
     this._changeData(
+        UpdateType.MINOR,
         Object.assign(
             {},
             this._film,
@@ -101,6 +103,7 @@ export default class Film {
 
   _handleFavoriteClick() {
     this._changeData(
+        UpdateType.MINOR,
         Object.assign(
             {},
             this._film,
@@ -112,7 +115,10 @@ export default class Film {
   }
 
   _handleCloseClick(film) {
-    this._changeData(film);
+    this._changeData(
+        UpdateType.MINOR,
+        film
+    );
     this._closeFilmCard();
   }
 }

@@ -52,12 +52,6 @@ const generateTitle = () => {
   return filmTitles[randomIndex];
 };
 
-export const statsCount = {
-  watchListCount: random(0, 50),
-  historyCount: random(0, 50),
-  favoritesCount: random(0, 50)
-};
-
 const generateDescription = () => {
   const text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. Phasellus eros mauris, condimentum sed nibh vitae, sodales efficitur ipsum. Sed blandit, eros vel aliquam faucibus, purus ex euismod diam, eu luctus nunc ante ut dui. Sed sed nisi sed augue convallis suscipit in sed felis. Aliquam erat volutpat. Nunc fermentum tortor ac porta dapibus. In rutrum ac purus sit amet tempus. `;
   const description = shuffle(text.split(`. `)).slice(0, random(1, 5)).join(`. `);
@@ -153,9 +147,7 @@ const generateCommentAutor = () => {
 };
 
 const generateCommentTime = () => {
-  const time = parseInt(new Date().getTime(), 10);
-  // const randomTime = random(time);
-  return time;
+  return parseInt(new Date().getTime(), 10);
 };
 
 const generateComment = () => {
