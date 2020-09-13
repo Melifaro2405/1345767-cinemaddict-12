@@ -24,3 +24,8 @@ export const UpdateType = {
   MINOR: `MINOR`,
   MAJOR: `MAJOR`
 };
+
+export const MenuItem = {
+  FILMS: `films`,
+  STATS: `stats`
+};
