@@ -1,8 +1,8 @@
-import {FilterType} from "../const";
+import {MenuType} from "../const";
 
 export const filterUtils = {
-  [FilterType.ALL_MOVIES]: (films) => films,
-  [FilterType.WATCHLIST]: (films) => films.filter((film) => film.isAddToWatchList),
-  [FilterType.HISTORY]: (films) => films.filter((film) => film.isAlreadyWatched),
-  [FilterType.FAVORITES]: (films) => films.filter((film) => film.isAddToFavorites)
+  [MenuType.ALL_MOVIES]: (films) => films,
+  [MenuType.WATCHLIST]: (films) => films.filter((film) => film.isAddToWatchList),
+  [MenuType.HISTORY]: (films) => films.filter((film) => film.isAlreadyWatched),
+  [MenuType.FAVORITES]: (films) => films.filter((film) => film.isAddToFavorites)
 };

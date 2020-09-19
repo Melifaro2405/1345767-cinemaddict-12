@@ -4,11 +4,11 @@ export const SortType = {
   RATING: `rating`
 };
 
-export const FilterType = {
+export const MenuType = {
   ALL_MOVIES: `all movies`,
   WATCHLIST: `watchlist`,
   HISTORY: `history`,
-  FAVORITES: `favorites`
+  FAVORITES: `favorites`,
 };
 
 export const KeyCode = {
@@ -24,3 +24,16 @@ export const UpdateType = {
   MINOR: `MINOR`,
   MAJOR: `MAJOR`
 };
+
+export const MenuItem = {
+  FILMS: `films`,
+  STATS: `stats`
+};
+
+// export const StatsFilters = {
+//   [`all-time`]: () => true,
+//   [`today`]: (film) => film.,
+//   [`week`]: () => true,
+//   [`month`]: () => true,
+//   [`year`]: () => true
+// };
