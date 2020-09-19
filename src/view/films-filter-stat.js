@@ -1,8 +1,7 @@
-import {FilterType} from "../const.js";
+import {MenuType} from "../const.js";
 import {MenuItem} from "../const.js";
 import {filterUtils} from "../utils/filter-films.js";
 import Smart from "./abstract-smart.js";
-import StatisticView from "./statistic.js";
 import {UpdateType} from "../const.js";
 
 export default class FilmsFilter extends Smart {
@@ -10,10 +9,9 @@ export default class FilmsFilter extends Smart {
     super();
     this._filmsModel = filmsModel;
     this._filterModel = filterModel;
-    this._currentFilterType = FilterType.ALL_MOVIES;
-    this._currentMenuType = MenuItem.FILMS;
+    this._currentMenuType = MenuType.ALL_MOVIES;
+    this._statType = false;
     this._countFilms();
-    this._statComponent = new StatisticView();
     this._filmsModel.addObserver(this._onDataChange.bind(this));
     this._onFilterClickHandler = this._onFilterClick.bind(this);
     this._menuClickHandler = this._menuClickHandler.bind(this);
@@ -25,12 +23,12 @@ export default class FilmsFilter extends Smart {
     return (
       `<nav class="main-navigation">
         <div class="main-navigation__items">
-          <a href="#all" class="main-navigation__item ${this._currentFilterType === FilterType.ALL_MOVIES ? `main-navigation__item--active` : ``}" data-filter-type="${FilterType.ALL_MOVIES}" data-menu-type="${MenuItem.FILMS}">All movies</a>
-          <a href="#watchlist" class="main-navigation__item ${this._currentFilterType === FilterType.WATCHLIST ? `main-navigation__item--active` : ``}" data-filter-type="${FilterType.WATCHLIST}" data-menu-type="${MenuItem.FILMS}">Watchlist <span class="main-navigation__item-count">${this._watchListCount}</span></a>
-          <a href="#history" class="main-navigation__item ${this._currentFilterType === FilterType.HISTORY ? `main-navigation__item--active` : ``}" data-filter-type="${FilterType.HISTORY}" data-menu-type="${MenuItem.FILMS}">History <span class="main-navigation__item-count">${this._historyCount}</span></a>
-          <a href="#favorites" class="main-navigation__item ${this._currentFilterType === FilterType.FAVORITES ? `main-navigation__item--active` : ``}" data-filter-type="${FilterType.FAVORITES}" data-menu-type="${MenuItem.FILMS}">Favorites <span class="main-navigation__item-count">${this._favoritesCount}</span></a>
+          <a href="#all" class="main-navigation__item ${this._currentMenuType === MenuType.ALL_MOVIES ? `main-navigation__item--active` : ``}" data-filter-type="${MenuType.ALL_MOVIES}">All movies</a>
+          <a href="#watchlist" class="main-navigation__item ${this._currentMenuType === MenuType.WATCHLIST ? `main-navigation__item--active` : ``}" data-filter-type="${MenuType.WATCHLIST}" data-menu-type="${MenuItem.FILMS}">Watchlist <span class="main-navigation__item-count">${this._watchListCount}</span></a>
+          <a href="#history" class="main-navigation__item ${this._currentMenuType === MenuType.HISTORY ? `main-navigation__item--active` : ``}" data-filter-type="${MenuType.HISTORY}" data-menu-type="${MenuItem.FILMS}">History <span class="main-navigation__item-count">${this._historyCount}</span></a>
+          <a href="#favorites" class="main-navigation__item ${this._currentMenuType === MenuType.FAVORITES ? `main-navigation__item--active` : ``}" data-filter-type="${MenuType.FAVORITES}" data-menu-type="${MenuItem.FILMS}">Favorites <span class="main-navigation__item-count">${this._favoritesCount}</span></a>
         </div>
-        <a href="#stats" class="main-navigation__additional ${this._currentMenuType === MenuItem.STATS ? `main-navigation__item--active` : ``}" data-menu-type="${MenuItem.STATS}">Stats</a>
+        <a href="#stats" class="main-navigation__additional ${this._statType ? `main-navigation__item--active` : ``}" data-menu-type="${MenuItem.STATS}">Stats</a>
       </nav>`
     );
   }
@@ -40,19 +38,21 @@ export default class FilmsFilter extends Smart {
       return;
     }
     evt.preventDefault();
-    const currentFilter = evt.target.dataset.filterType;
+    this._statType = false;
+    const currentMenuType = evt.target.dataset.filterType;
 
-    this._filterModel.setFilter(UpdateType.MINOR, currentFilter);
-    this._currentFilterType = currentFilter;
+    this._filterModel.setFilter(UpdateType.MINOR, currentMenuType);
+    this._currentMenuType = currentMenuType;
     this.updateElement();
+    this._callback.filterClick();
   }
 
   _countFilms() {
     const films = this._filmsModel.getFilms();
 
-    this._watchListCount = filterUtils[FilterType.WATCHLIST](films).length;
-    this._historyCount = filterUtils[FilterType.HISTORY](films).length;
-    this._favoritesCount = filterUtils[FilterType.FAVORITES](films).length;
+    this._watchListCount = filterUtils[MenuType.WATCHLIST](films).length;
+    this._historyCount = filterUtils[MenuType.HISTORY](films).length;
+    this._favoritesCount = filterUtils[MenuType.FAVORITES](films).length;
   }
 
   _onDataChange() {
@@ -62,24 +62,24 @@ export default class FilmsFilter extends Smart {
 
   _menuClickHandler(evt) {
     evt.preventDefault();
+    this._statType = true;
+    this._currentMenuType = false;
     this._callback.menuClick(evt.target.dataset.menuType);
+    this.updateElement();
   }
 
   setMenuClickHandler(callback) {
     this._callback.menuClick = callback;
-    this.getElement().addEventListener(`click`, this._menuClickHandler);
+    this.getElement().querySelector(`.main-navigation__additional`).addEventListener(`click`, this._menuClickHandler);
   }
 
-  // setMenuItem(menuItem) {
-  //   const item = this.getElement().querySelector(`[value=${menuItem}]`);
-
-  //   if (item !== null) {
-  //     item.checked = true;
-  //   }
-  // }
+  setFilterClickHandler(callback) {
+    this._callback.filterClick = callback;
+    this.getElement().querySelector(`.main-navigation__items`).addEventListener(`click`, this._onFilterClickHandler);
+  }
 
   setHandlers() {
-    this.getElement().querySelector(`.main-navigation__items`).addEventListener(`click`, this._onFilterClickHandler);
-    // this.getElement().querySelector(`.main-navigation__additional`).addEventListener(`click`, this._onStatClickHandler);
+    this.setFilterClickHandler(this._callback.filterClick);
+    this.setMenuClickHandler(this._callback.menuClick);
   }
 }

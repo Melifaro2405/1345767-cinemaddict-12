@@ -34,14 +34,12 @@ export default class Board {
     this._noDataComponent = new NoDataView();
 
     this._handleFilmChange = this._handleFilmChange.bind(this);
+    this._onFilterTypeChange = this._onFilterTypeChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
   init() {
-    this._filmsModel.addObserver(this._handleFilmChange.bind(this));
-    this._filterModel.addObserver(this._onFilterTypeChange.bind(this));
-
     this._renderSort();
 
     render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
@@ -50,22 +48,26 @@ export default class Board {
     this._renderList();
     this._renderBoard();
 
-    this._renderTopRated();
-    this._renderMostCommented();
+    // this._renderTopRated();
+    // this._renderMostCommented();
+
+    this._filmsModel.addObserver(this._handleFilmChange);
+    this._filterModel.addObserver(this._onFilterTypeChange);
   }
 
   destroy() {
-    this._clearBoard({resetRenderedFilmCount: true});
+    this._clearBoard();
 
     remove(this._listContainerComponent);
     remove(this._listComponent);
     remove(this._boardComponent);
+    remove(this._sortComponent);
 
-    remove(this._topRatedComponent);
-    remove(this._mostCommentedComponent);
+    // remove(this._topRatedComponent);
+    // remove(this._mostCommentedComponent);
 
-    this._filmsModel.removeObserver(this._handleFilmChange.bind(this));
-    this._filterModel.removeObserver(this._onFilterTypeChange.bind(this));
+    this._filmsModel.removeObserver(this._handleFilmChange);
+    this._filterModel.removeObserver(this._onFilterTypeChange);
   }
 
   _getFilms() {
@@ -86,7 +88,7 @@ export default class Board {
     this._renderFilmList();
   }
 
-  _handleFilmChange(filterType, updatedFilm) {
+  _handleFilmChange(updateType, updatedFilm) {
     this._filmPresenter[updatedFilm.id].init(updatedFilm);
   }
 
@@ -105,23 +107,14 @@ export default class Board {
     render(this._boardContainer, this._sortComponent, RenderPosition.BEFOREEND);
   }
 
-  _clearBoard(resetRenderedFilmCount = false) {
-    const filmCount = this._getFilms().length;
-
+  _clearBoard() {
     Object
       .values(this._filmPresenter)
       .forEach((presenter) => presenter.destroy());
     this._filmPresenter = {};
 
     remove(this._noDataComponent);
-    remove(this._sortComponent);
     remove(this._showMoreButtonComponent);
-
-    if (resetRenderedFilmCount) {
-      this._renderedFilmCount = FILMS_COUNT_PER_STEP;
-    } else {
-      this._renderedFilmCount = Math.min(filmCount, this._renderedFilmCount);
-    }
   }
 
   _renderList() {
@@ -196,6 +189,7 @@ export default class Board {
   }
 
   _renderFilmList() {
+    this._renderedFilmCount = FILMS_COUNT_PER_STEP;
     const filmCount = this._getFilms().length;
     const films = filterUtils[this._filterModel.getFilter()](this._getFilms()).slice(0, Math.min(filmCount, this._renderedFilmCount));
 
