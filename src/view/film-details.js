@@ -105,8 +105,8 @@ export default class FilmDetails extends SmartView {
                     <td class="film-details__term">Genres</td>
                     <td class="film-details__cell">
                       <span class="film-details__genre">${this._film.genres[0]}</span>
-                      <span class="film-details__genre">${this._film.genres[1]}</span>
-                      <span class="film-details__genre">${this._film.genres[2]}</span></td>
+                      <span class="film-details__genre">${this._film.genres[1] || ``}</span>
+                      <span class="film-details__genre">${this._film.genres[2] || ``}</span></td>
                   </tr>
                 </table>
 
