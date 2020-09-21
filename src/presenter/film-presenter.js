@@ -4,9 +4,10 @@ import {render, RenderPosition, replace, remove} from "../utils/render.js";
 import {UpdateType} from "../const.js";
 
 export default class Film {
-  constructor(filmListContainer, changeData) {
+  constructor(filmListContainer, changeData, api) {
     this._filmListContainer = filmListContainer;
     this._changeData = changeData;
+    this._api = api;
 
     this._filmCardComponent = null;
     this._filmDetailsComponent = null;
@@ -55,8 +56,11 @@ export default class Film {
   }
 
   _openFilmCard() {
-    this._filmDetailsComponent.showFilmDetails();
-    document.addEventListener(`keydown`, this._escKeyDownHandler);
+    this._api.getComments(this._film.id)
+      .then((comments) => {
+        this._filmDetailsComponent.showFilmDetails(comments);
+        document.addEventListener(`keydown`, this._escKeyDownHandler);
+      });
   }
 
   _closeFilmCard() {

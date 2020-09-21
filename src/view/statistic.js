@@ -8,7 +8,7 @@ export default class Statistic extends SmartView {
   constructor(films) {
     super();
     this.activeStatus = `all-time`;
-    this._films = films.filter((film) => film.isAddToWatchList);
+    this._films = films.filter((film) => film.isAlreadyWatched);
 
     this._filmsDuration = this._films.reduce(
         (accumulator, currentValue) => accumulator + currentValue.runtime

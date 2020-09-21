@@ -22,12 +22,21 @@ export const UserAction = {
 
 export const UpdateType = {
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 export const MenuItem = {
   FILMS: `films`,
   STATS: `stats`
+};
+
+export const StatsFilters = {
+  ALL_TIME: `all time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`
 };
 
 // export const StatsFilters = {
