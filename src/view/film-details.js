@@ -9,6 +9,7 @@ export default class FilmDetails extends SmartView {
 
     this._isAdult = film.isAdult;
     this._film = film;
+    this._comments = [];
 
     const filmReleaseFullDate = formatFilmFullDate(this._film.releaseDate);
     this.filmReleaseFullDate = filmReleaseFullDate;
@@ -29,17 +30,17 @@ export default class FilmDetails extends SmartView {
 
   _createComment(comment) {
 
-    const filmCommentDate = formatCommentTime(comment.time);
+    const filmCommentDate = formatCommentTime(comment.date);
 
     return (
       `<li class="film-details__comment">
           <span class="film-details__comment-emoji">
-            <img src="${comment.emoji}" width="55" height="55" alt="emoji-smile">
+            <img src="images/emoji/${comment.emotion}.png" width="55" height="55" alt="emoji-smile">
           </span>
           <div>
-            <p class="film-details__comment-text">${he.encode(comment.text)}</p>
+            <p class="film-details__comment-text">${he.encode(comment.comment)}</p>
             <p class="film-details__comment-info">
-              <span class="film-details__comment-author">${comment.autor}</span>
+              <span class="film-details__comment-author">${comment.author}</span>
               <span class="film-details__comment-day">${filmCommentDate}</span>
               <button class="film-details__comment-delete">Delete</button>
             </p>
@@ -60,14 +61,14 @@ export default class FilmDetails extends SmartView {
               <div class="film-details__poster">
                 <img class="film-details__poster-img" src="${this._film.poster}" alt="">
 
-                <p class="film-details__age">${this._isAdult ? `18+` : ``}</p>
+                <p class="film-details__age">${this._isAdult}+</p>
               </div>
 
               <div class="film-details__info">
                 <div class="film-details__info-head">
                   <div class="film-details__title-wrap">
                     <h3 class="film-details__title">${this._film.title}</h3>
-                    <p class="film-details__title-original">Original: ${this._film.title}</p>
+                    <p class="film-details__title-original">Original: ${this._film.alternativeTitle}</p>
                   </div>
 
                   <div class="film-details__rating">
@@ -104,8 +105,8 @@ export default class FilmDetails extends SmartView {
                     <td class="film-details__term">Genres</td>
                     <td class="film-details__cell">
                       <span class="film-details__genre">${this._film.genres[0]}</span>
-                      <span class="film-details__genre">${this._film.genres[1]}</span>
-                      <span class="film-details__genre">${this._film.genres[2]}</span></td>
+                      <span class="film-details__genre">${this._film.genres[1] || ``}</span>
+                      <span class="film-details__genre">${this._film.genres[2] || ``}</span></td>
                   </tr>
                 </table>
 
@@ -130,7 +131,7 @@ export default class FilmDetails extends SmartView {
               <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._film.comments.length}</span></h3>
 
               <ul class="film-details__comments-list">
-                ${this._film.comments.map(this._createComment).join(``)}
+                ${this._comments.map(this._createComment).join(``)}
               </ul>
 
               <div class="film-details__new-comment">
@@ -195,7 +196,9 @@ export default class FilmDetails extends SmartView {
     document.body.classList.remove(`hide-overflow`);
   }
 
-  showFilmDetails() {
+  showFilmDetails(comments) {
+    this._comments = comments;
+    this.updateElement();
     this._showPopup(this);
   }
 

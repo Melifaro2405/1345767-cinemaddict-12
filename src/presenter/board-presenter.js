@@ -7,6 +7,7 @@ import FilmsTopRatedView from "../view/films-top-rated.js";
 import FilmsMostCommentedView from "../view/films-most-commented.js";
 import FilmCardView from "../view/film-card.js";
 import FilmsSortView from "../view/films-sort.js";
+import LoadingView from "../view/loading.js";
 import FilmPresenter from "./film-presenter.js";
 import {SortType} from "../const.js";
 import {filterUtils} from "../utils/filter-films.js";
@@ -18,12 +19,14 @@ const FILMS_RATED_COUNT = 2;
 const FILMS_COMMENTED_COUNT = 2;
 
 export default class Board {
-  constructor(boardContainer, filmsModel, filterModel) {
+  constructor(boardContainer, filmsModel, filterModel, api) {
     this._filmsModel = filmsModel;
     this._filterModel = filterModel;
     this._boardContainer = boardContainer;
     this._renderedFilmCount = FILMS_COUNT_PER_STEP;
     this._filmPresenter = {};
+    this._isLoading = true;
+    this._api = api;
 
     this._sortComponent = new FilmsSortView();
     this._boardComponent = new FilmsBoardView();
@@ -32,14 +35,17 @@ export default class Board {
     this._topRatedComponent = new FilmsTopRatedView();
     this._mostCommentedComponent = new FilmsMostCommentedView();
     this._noDataComponent = new NoDataView();
+    this._loadingComponent = new LoadingView();
 
     this._handleFilmChange = this._handleFilmChange.bind(this);
     this._onFilterTypeChange = this._onFilterTypeChange.bind(this);
     this._handleShowMoreButtonClick = this._handleShowMoreButtonClick.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._renderLoading();
   }
 
   init() {
+    this._loadingCompleted();
     this._renderSort();
 
     render(this._boardContainer, this._boardComponent, RenderPosition.BEFOREEND);
@@ -62,6 +68,7 @@ export default class Board {
     remove(this._listComponent);
     remove(this._boardComponent);
     remove(this._sortComponent);
+    remove(this._loadingComponent);
 
     // remove(this._topRatedComponent);
     // remove(this._mostCommentedComponent);
@@ -152,7 +159,7 @@ export default class Board {
   }
 
   _renderFilm(film) {
-    const filmPresenter = new FilmPresenter(this._listContainerComponent, this._filmsModel.updateFilm.bind(this._filmsModel));
+    const filmPresenter = new FilmPresenter(this._listContainerComponent, this._filmsModel.updateFilm.bind(this._filmsModel), this._api);
     filmPresenter.init(film);
     this._filmPresenter[film.id] = filmPresenter;
   }
@@ -200,7 +207,20 @@ export default class Board {
     }
   }
 
+  _renderLoading() {
+    render(this._boardComponent, this._loadingComponent, RenderPosition.AFTERBEGIN);
+  }
+
+  _loadingCompleted() {
+    this._isLoading = false;
+    remove(this._loadingComponent);
+  }
+
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
     const filmCount = this._getFilms().length;
 
     if (filmCount === 0) {
