@@ -2,12 +2,15 @@ import FilmCardView from "../view/film-card.js";
 import FilmDetailsView from "../view/film-details.js";
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
 import {UpdateType} from "../const.js";
+import CommentsModel from "../model/comments-model.js";
 
 export default class Film {
   constructor(filmListContainer, changeData, api) {
     this._filmListContainer = filmListContainer;
     this._changeData = changeData;
     this._api = api;
+
+    this._commentsModel = new CommentsModel();
 
     this._filmCardComponent = null;
     this._filmDetailsComponent = null;
@@ -27,7 +30,7 @@ export default class Film {
     const prevfilmDetailsComponent = this._filmDetailsComponent;
 
     this._filmCardComponent = new FilmCardView(film);
-    this._filmDetailsComponent = new FilmDetailsView(film);
+    this._filmDetailsComponent = new FilmDetailsView(film, this._api, this._commentsModel);
 
     this._filmCardComponent.setOpenClickHandler(this._handleOpenClick);
     this._filmCardComponent.setWatchlistClickHandler(this._handleWatchlistClick);

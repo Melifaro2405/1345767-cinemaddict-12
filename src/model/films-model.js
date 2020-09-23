@@ -32,7 +32,6 @@ export default class Films extends Observer {
 
   static adaptToClient(data) {
     return {
-      isRank: `isRank`,
       comments: data.comments,
       id: data.id,
       title: data.film_info.title,

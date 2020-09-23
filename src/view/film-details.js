@@ -1,14 +1,16 @@
 import he from "he";
 import SmartView from "./abstract-smart.js";
-import {KeyCode} from "../const.js";
+import {KeyCode, UpdateType} from "../const.js";
 import {formatFilmFullDate, formatFilmRunTime, formatCommentTime} from "../utils/format-date.js";
 
 export default class FilmDetails extends SmartView {
-  constructor(film) {
+  constructor(film, api, comment) {
     super();
 
     this._isAdult = film.isAdult;
     this._film = film;
+    this._api = api;
+    this._comment = comment;
     this._comments = [];
 
     const filmReleaseFullDate = formatFilmFullDate(this._film.releaseDate);
@@ -24,6 +26,7 @@ export default class FilmDetails extends SmartView {
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._emojiClickHandler = this._emojiClickHandler.bind(this);
+    this._onClickDeleteComment = this._onClickDeleteComment.bind(this);
 
     this.setHandlers();
   }
@@ -42,10 +45,16 @@ export default class FilmDetails extends SmartView {
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comment.author}</span>
               <span class="film-details__comment-day">${filmCommentDate}</span>
-              <button class="film-details__comment-delete">Delete</button>
+              <button class="film-details__comment-delete" data-id-type="${comment.id}">Delete</button>
             </p>
           </div>
         </li>`
+    );
+  }
+
+  _createGenre(genre) {
+    return (
+      `<span class="film-details__genre">${genre}</span>`
     );
   }
 
@@ -104,9 +113,7 @@ export default class FilmDetails extends SmartView {
                   <tr class="film-details__row">
                     <td class="film-details__term">Genres</td>
                     <td class="film-details__cell">
-                      <span class="film-details__genre">${this._film.genres[0]}</span>
-                      <span class="film-details__genre">${this._film.genres[1] || ``}</span>
-                      <span class="film-details__genre">${this._film.genres[2] || ``}</span></td>
+                      <span class="film-details__genre">${this._film.genres.map(this._createGenre).join(``)}</span>
                   </tr>
                 </table>
 
@@ -250,10 +257,25 @@ export default class FilmDetails extends SmartView {
         emoji: `images/emoji/${emojiImg}.png`
       };
 
+      this._api.addComment(newComment).then((response) => {
+        this._comment.addComment(UpdateType, response);
+      });
+
       this.updateData({
         comments: [...this._film.comments, newComment]
       });
     }
+  }
+
+  _onClickDeleteComment(evt) {
+    if (!evt.target.classList.contains(`film-details__comment-delete`)) {
+      return;
+    }
+    const commentId = evt.target.dataset.idType;
+    this._api.deleteComment(commentId).then(() => {
+      this._comment.deleteComment(UpdateType, commentId);
+    });
+    this.updateElement();
   }
 
   setHandlers() {
@@ -277,5 +299,8 @@ export default class FilmDetails extends SmartView {
       });
 
     this.setCloseClickHandler(this._callback.closeClick);
+
+    this.getElement().querySelector(`.film-details__comments-list`)
+    .addEventListener(`click`, this._onClickDeleteComment);
   }
 }
