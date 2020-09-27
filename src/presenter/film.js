@@ -2,7 +2,7 @@ import FilmCardView from "../view/film-card.js";
 import FilmDetailsView from "../view/film-details.js";
 import {render, RenderPosition, replace, remove} from "../utils/render.js";
 import {UpdateType} from "../const.js";
-import CommentsModel from "../model/comments-model.js";
+import CommentsModel from "../model/comments.js";
 
 export default class Film {
   constructor(filmListContainer, changeData, api) {
@@ -61,7 +61,8 @@ export default class Film {
   _openFilmCard() {
     this._api.getComments(this._film.id)
       .then((comments) => {
-        this._filmDetailsComponent.showFilmDetails(comments);
+        this._commentsModel.setComments(comments);
+        this._filmDetailsComponent.showFilmDetails();
         document.addEventListener(`keydown`, this._escKeyDownHandler);
       });
   }
@@ -69,6 +70,7 @@ export default class Film {
   _closeFilmCard() {
     this._filmDetailsComponent.hideFilmDetails();
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
+    this._changeData(UpdateType.MINOR, this._film);
   }
 
   _escKeyDownHandler(evt) {

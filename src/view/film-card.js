@@ -1,6 +1,8 @@
 import AbstractView from "./abstract.js";
 import {formatFilmYear, formatFilmRunTime} from "../utils/format-date.js";
 
+const MAX_COUNT_LETTERS = 140;
+
 export default class FilmCard extends AbstractView {
   constructor(film) {
     super();
@@ -34,7 +36,7 @@ export default class FilmCard extends AbstractView {
           <span class="film-card__genre">${this._film.genres[0]}</span>
         </p>
         <img src="${this._film.poster}" alt="" class="film-card__poster">
-        <p class="film-card__description">${this._film.description}</p>
+        <p class="film-card__description">${this._limitDescription(this._film.description)}</p>
         <a class="film-card__comments">${this._film.comments.length} comments</a>
         <form class="film-card__controls">
           <button class="film-card__controls-item button film-card__controls-item--add-to-watchlist ${this._isAddToWatchList ? `film-card__controls-item--active` : ``}">Add to watchlist</button>
@@ -43,6 +45,10 @@ export default class FilmCard extends AbstractView {
         </form>
       </article>`
     );
+  }
+
+  _limitDescription(description) {
+    return (description.length > MAX_COUNT_LETTERS) ? description.slice(0, MAX_COUNT_LETTERS) + `...` : description;
   }
 
   _openClickHandler(evt) {

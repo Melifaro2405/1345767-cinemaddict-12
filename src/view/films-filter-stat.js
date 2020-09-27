@@ -1,10 +1,10 @@
 import {MenuType} from "../const.js";
 import {MenuItem} from "../const.js";
 import {filterUtils} from "../utils/filter-films.js";
-import Smart from "./abstract-smart.js";
+import Smart from "./smart.js";
 import {UpdateType} from "../const.js";
 
-export default class FilmsFilter extends Smart {
+export default class FilmsFilterStat extends Smart {
   constructor(filmsModel, filterModel) {
     super();
     this._filmsModel = filmsModel;

@@ -1,4 +1,5 @@
 import Observer from "../utils/observer.js";
+import moment from "moment";
 
 export default class Films extends Observer {
   constructor() {
@@ -28,6 +29,20 @@ export default class Films extends Observer {
     ];
 
     this.notify(updateType, update);
+  }
+
+  static getRank(count) {
+
+    switch (true) {
+      case count > 20:
+        return `Movie Buff`;
+      case count > 10:
+        return `Fan`;
+      case count > 0:
+        return `Novice`;
+      default:
+        return ``;
+    }
   }
 
   static adaptToClient(data) {
@@ -73,13 +88,13 @@ export default class Films extends Observer {
         "title": data.title,
         "total_rating": data.raiting,
         "writers": data.writers,
-        "id": data.id,
-        "user_details": {
-          "already_watched": data.isAlreadyWatched,
-          "favorite": data.isAddToFavorites,
-          "watching_date": `watching_date`,
-          "watchlist": data.isAddToWatchList
-        }
+        "id": data.id
+      },
+      "user_details": {
+        "already_watched": data.isAlreadyWatched,
+        "favorite": data.isAddToFavorites,
+        "watching_date": moment().toISOString((new Date().getTime())),
+        "watchlist": data.isAddToWatchList
       }
     };
   }

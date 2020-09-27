@@ -32,17 +32,9 @@ export const MenuItem = {
 };
 
 export const StatsFilters = {
-  ALL_TIME: `all time`,
+  ALL_TIME: `all-time`,
   TODAY: `today`,
   WEEK: `week`,
   MONTH: `month`,
   YEAR: `year`
 };
-
-// export const StatsFilters = {
-//   [`all-time`]: () => true,
-//   [`today`]: (film) => film.,
-//   [`week`]: () => true,
-//   [`month`]: () => true,
-//   [`year`]: () => true
-// };

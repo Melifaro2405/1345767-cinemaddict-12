@@ -2,9 +2,9 @@ import SiteHeaderView from "./view/site-header.js";
 import FilmsFilterStatView from "./view/films-filter-stat.js";
 import {render, RenderPosition, remove} from "./utils/render.js";
 import {UpdateType} from "./const.js";
-import BoardPresenter from "./presenter/board-presenter.js";
-import FilmsModel from "./model/films-model.js";
-import FilterModel from "./model/filter-model.js";
+import BoardPresenter from "./presenter/board.js";
+import FilmsModel from "./model/films.js";
+import FilterModel from "./model/filter.js";
 import FooterStatView from "./view/footer-stat.js";
 import StatisticsView from "./view/statistic.js";
 import Api from "./api.js";
@@ -54,10 +54,11 @@ api.getFilms()
   })
   .finally(() => {
     const filmsFilterStatComponent = new FilmsFilterStatView(filmsModel, filterModel);
-    const siteHeaderComponent = new SiteHeaderView(filmsModel.getFilms());
+    const siteHeaderComponent = new SiteHeaderView(filmsModel);
     const footerStatComponent = new FooterStatView(filmsModel.getFilms());
     render(siteHeader, siteHeaderComponent, RenderPosition.BEFOREEND);
     render(siteMain, filmsFilterStatComponent, RenderPosition.BEFOREEND);
+    boardPresenter.renderLoading();
     render(siteFooter, footerStatComponent, RenderPosition.BEFOREEND);
     boardPresenter.init();
     filmsFilterStatComponent.setFilterClickHandler(handleSiteMenuClick);

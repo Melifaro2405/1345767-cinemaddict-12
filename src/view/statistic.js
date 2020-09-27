@@ -1,24 +1,35 @@
-import SmartView from "./abstract-smart.js";
+import SmartView from "./smart.js";
 import Chart from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import FilmsModel from "../model/films.js";
+import {StatsFilters} from "../const.js";
+import moment from "moment";
 
 const MINUTES_IN_HOUR = 60;
 
 export default class Statistic extends SmartView {
   constructor(films) {
     super();
-    this.activeStatus = `all-time`;
     this._films = films.filter((film) => film.isAlreadyWatched);
-
-    this._filmsDuration = this._films.reduce(
-        (accumulator, currentValue) => accumulator + currentValue.runtime
-        , 0);
+    this.currentFilter = StatsFilters.ALL_TIME;
     this.createStats(this.getElement().querySelector(`.statistic__chart`));
+    this.setHandlers();
+  }
+
+  setHandlers() {
+    this.getElement().querySelector(`.statistic__filters`).addEventListener(`change`, (evt) => {
+      if (evt.target.tagName !== `INPUT`) {
+        return;
+      }
+      this.currentFilter = evt.target.value;
+      this.updateElement();
+      this.createStats(this.getElement().querySelector(`.statistic__chart`));
+    });
   }
 
   _setFilmsGenres() {
     const counts = {};
-    const genres = this._films.reduce((acc, curr) => {
+    const genres = this._setWatchedTimeInterval(this._films, this.currentFilter).reduce((acc, curr) => {
       return acc.concat(curr.genres);
     }, []);
     for (const genre of genres) {
@@ -96,33 +107,48 @@ export default class Statistic extends SmartView {
     });
   }
 
+  _getFilmsDuration() {
+    return this._setWatchedTimeInterval(this._films, this.currentFilter).reduce(
+        (accumulator, currentValue) => accumulator + currentValue.runtime
+        , 0);
+  }
+
   _totalDurationHours() {
-    return Math.floor(this._filmsDuration / MINUTES_IN_HOUR);
+    return Math.floor(this._getFilmsDuration() / MINUTES_IN_HOUR);
   }
 
   _durationRemainingMinutes() {
-    return this._filmsDuration % MINUTES_IN_HOUR;
+    return this._getFilmsDuration() % MINUTES_IN_HOUR;
   }
 
-  getRank() {
-    const count = this._films.length;
+  _setWatchedTimeInterval(films, statsFilters) {
+    const currentDate = moment();
+    const dateWeekAgo = moment().subtract(7, `days`);
+    const dateMonthAgo = moment().subtract(1, `month`);
+    const dateYearAgo = moment().subtract(1, `year`);
 
-    switch (true) {
-      case count > 20:
-        return `Movie Buff`;
-      case count > 10:
-        return `Fan`;
-      case count > 0:
-        return `Novice`;
+    switch (statsFilters) {
+      case StatsFilters.ALL_TIME:
+        return films;
+      case StatsFilters.TODAY:
+        return films
+          .filter((film) => film.isAlreadyWatched && moment(film.watchingDate)
+            .isSame(currentDate, `day`));
+      case StatsFilters.WEEK:
+        return films
+          .filter((film) => film.isAlreadyWatched && moment(film.watchingDate)
+            .isBetween(dateWeekAgo, currentDate));
+      case StatsFilters.MONTH:
+        return films
+          .filter((film) => film.isAlreadyWatched && moment(film.watchingDate)
+            .isBetween(dateMonthAgo, currentDate));
+      case StatsFilters.YEAR:
+        return films
+          .filter((film) => film.isAlreadyWatched && moment(film.watchingDate)
+            .isBetween(dateYearAgo, currentDate));
       default:
-        return ``;
+        return films;
     }
-  }
-
-  _onStatsChange(evt) {
-    evt.preventDefault();
-    this.activeStatus = evt.target.value;
-    this.createStats();
   }
 
   getTemplate() {
@@ -131,32 +157,32 @@ export default class Statistic extends SmartView {
         <p class="statistic__rank">
           Your rank
           <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-          <span class="statistic__rank-label">${this.getRank()}</span>
+          <span class="statistic__rank-label">${FilmsModel.getRank(this._films.length)}</span>
         </p>
 
         <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
           <p class="statistic__filters-description">Show stats:</p>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" checked>
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" ${this.currentFilter === StatsFilters.ALL_TIME ? `checked` : ``}>
           <label for="statistic-all-time" class="statistic__filters-label">All time</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today">
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today" ${this.currentFilter === StatsFilters.TODAY ? `checked` : ``}>
           <label for="statistic-today" class="statistic__filters-label">Today</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week">
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week" ${this.currentFilter === StatsFilters.WEEK ? `checked` : ``}>
           <label for="statistic-week" class="statistic__filters-label">Week</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month">
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month" ${this.currentFilter === StatsFilters.MONTH ? `checked` : ``}>
           <label for="statistic-month" class="statistic__filters-label">Month</label>
 
-          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year">
+          <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year" ${this.currentFilter === StatsFilters.YEAR ? `checked` : ``}>
           <label for="statistic-year" class="statistic__filters-label">Year</label>
         </form>
 
         <ul class="statistic__text-list">
           <li class="statistic__text-item">
             <h4 class="statistic__item-title">You watched</h4>
-            <p class="statistic__item-text">${this._films.length} <span class="statistic__item-description">movies</span></p>
+            <p class="statistic__item-text">${this._setWatchedTimeInterval(this._films, this.currentFilter).length} <span class="statistic__item-description">movies</span></p>
           </li>
           <li class="statistic__text-item">
             <h4 class="statistic__item-title">Total duration</h4>

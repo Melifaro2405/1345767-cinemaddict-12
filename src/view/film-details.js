@@ -1,17 +1,18 @@
 import he from "he";
-import SmartView from "./abstract-smart.js";
+import SmartView from "./smart.js";
 import {KeyCode, UpdateType} from "../const.js";
 import {formatFilmFullDate, formatFilmRunTime, formatCommentTime} from "../utils/format-date.js";
+import moment from "moment";
+import FilmsModel from "../model/films.js";
 
 export default class FilmDetails extends SmartView {
-  constructor(film, api, comment) {
+  constructor(film, api, comments) {
     super();
 
     this._isAdult = film.isAdult;
     this._film = film;
     this._api = api;
-    this._comment = comment;
-    this._comments = [];
+    this._comments = comments;
 
     const filmReleaseFullDate = formatFilmFullDate(this._film.releaseDate);
     this.filmReleaseFullDate = filmReleaseFullDate;
@@ -45,7 +46,9 @@ export default class FilmDetails extends SmartView {
             <p class="film-details__comment-info">
               <span class="film-details__comment-author">${comment.author}</span>
               <span class="film-details__comment-day">${filmCommentDate}</span>
-              <button class="film-details__comment-delete" data-id-type="${comment.id}">Delete</button>
+              <button class="film-details__comment-delete" data-id-type="${comment.id}">
+                Delete
+              </button>
             </p>
           </div>
         </li>`
@@ -111,7 +114,7 @@ export default class FilmDetails extends SmartView {
                     <td class="film-details__cell">${this._film.country}</td>
                   </tr>
                   <tr class="film-details__row">
-                    <td class="film-details__term">Genres</td>
+                    <td class="film-details__term">${this._film.genres.length > 1 ? `Genres` : `Genre`}</td>
                     <td class="film-details__cell">
                       <span class="film-details__genre">${this._film.genres.map(this._createGenre).join(``)}</span>
                   </tr>
@@ -135,10 +138,10 @@ export default class FilmDetails extends SmartView {
 
           <div class="form-details__bottom-container">
             <section class="film-details__comments-wrap">
-              <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._film.comments.length}</span></h3>
+              <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${this._comments.getComments().length}</span></h3>
 
               <ul class="film-details__comments-list">
-                ${this._comments.map(this._createComment).join(``)}
+                ${this._comments.getComments().map(this._createComment).join(``)}
               </ul>
 
               <div class="film-details__new-comment">
@@ -203,10 +206,9 @@ export default class FilmDetails extends SmartView {
     document.body.classList.remove(`hide-overflow`);
   }
 
-  showFilmDetails(comments) {
-    this._comments = comments;
-    this.updateElement();
+  showFilmDetails() {
     this._showPopup(this);
+    this.updateElement();
   }
 
   hideFilmDetails() {
@@ -249,33 +251,64 @@ export default class FilmDetails extends SmartView {
       const inputComment = evt.target.value;
 
       const emojiImg = this.getElement().querySelector(`.film-details__emoji-list input:checked`).value;
+      const commentInput = this.getElement().querySelector(`.film-details__comment-input`);
+      const commentContainer = this.getElement().querySelector(`.film-details__new-comment`);
+      commentInput.disabled = true;
 
       const newComment = {
-        autor: `here will be the name`,
-        time: parseInt(new Date().getTime(), 10),
-        text: inputComment,
-        emoji: `images/emoji/${emojiImg}.png`
+        filmId: this._film.id,
+        date: moment().toISOString((new Date().getTime())),
+        comment: inputComment,
+        emotion: emojiImg
       };
 
-      this._api.addComment(newComment).then((response) => {
-        this._comment.addComment(UpdateType, response);
-      });
-
-      this.updateData({
-        comments: [...this._film.comments, newComment]
+      this._api.addComment(newComment)
+      .then((data) => {
+        this._film = FilmsModel.adaptToClient(data.movie);
+        this._comments.setComments(data.comments);
+        this.updateElement();
+      })
+      .catch(() => {
+        commentContainer.classList.add(`shake`);
+      })
+      .finally(() => {
+        commentInput.disabled = false;
+        setTimeout(() => {
+          commentContainer.classList.remove(`shake`);
+        }, 600);
       });
     }
   }
 
   _onClickDeleteComment(evt) {
+    evt.preventDefault();
     if (!evt.target.classList.contains(`film-details__comment-delete`)) {
       return;
     }
+
     const commentId = evt.target.dataset.idType;
-    this._api.deleteComment(commentId).then(() => {
-      this._comment.deleteComment(UpdateType, commentId);
+
+    evt.target.textContent = `Deleting...`;
+    evt.target.disabled = true;
+
+    this._api.deleteComment(commentId)
+    .then(() => {
+      this._comments.deleteComment(UpdateType, this._comments.getComments().find((comment) => comment.id === commentId));
+      this.updateData(this._film.comments.length);
+      this._deleteCOmmentData(commentId);
+      this.updateElement();
+    })
+    .catch(() => {
+      evt.target.textContent = `Delete`;
+      evt.target.disabled = false;
     });
-    this.updateElement();
+  }
+
+  _deleteCOmmentData(commentId) {
+    const index = this._film.comments.findIndex((comment) => {
+      return comment === commentId;
+    });
+    this._film.comments.splice(index, 1);
   }
 
   setHandlers() {
@@ -301,6 +334,6 @@ export default class FilmDetails extends SmartView {
     this.setCloseClickHandler(this._callback.closeClick);
 
     this.getElement().querySelector(`.film-details__comments-list`)
-    .addEventListener(`click`, this._onClickDeleteComment);
+      .addEventListener(`click`, this._onClickDeleteComment);
   }
 }
