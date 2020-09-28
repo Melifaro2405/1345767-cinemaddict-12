@@ -19,10 +19,6 @@ export default class Provider {
     this._store = store;
   }
 
-  getComments(filmId) {
-    return this._api.getComments(filmId);
-  }
-
   getFilms() {
     if (Provider.isOnline()) {
       return this._api.getFilms()
@@ -36,6 +32,10 @@ export default class Provider {
     const storeFilms = Object.values(this._store.getItems());
 
     return Promise.resolve(storeFilms.map(FilmsModel.adaptToClient));
+  }
+
+  getComments(id) {
+    return this._api.getComments(id);
   }
 
   updateFilm(film) {
@@ -52,12 +52,12 @@ export default class Provider {
     return Promise.resolve(film);
   }
 
-  addComment(film, comment) {
-    return this._api.addComment(film, comment);
+  addComment(comment) {
+    return this._api.addComment(comment);
   }
 
-  removeComment(commentID) {
-    return this._api.removeComment(commentID);
+  deleteComment(comment) {
+    return this._api.deleteComment(comment);
   }
 
   sync() {
